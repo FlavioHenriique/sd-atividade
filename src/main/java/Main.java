@@ -1,16 +1,28 @@
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class Main {
 
     private static DAO dao;
+    private static ArrayBlockingQueue<Entidade> InsertQueue;
+    private static ArrayBlockingQueue<Entidade> UpdateQueue;
+    private static ArrayBlockingQueue<Integer> DeleteQueue;
 
     public static void main(String[] args) {
-
+        InsertQueue = new ArrayBlockingQueue<Entidade>(50);
+        UpdateQueue = new ArrayBlockingQueue<Entidade>(50);
+        DeleteQueue = new ArrayBlockingQueue<Integer>(1);
+        //
         dao = new DAO();
         int k = 1;
-        long tempo = System.currentTimeMillis();
+        final long tempo = System.currentTimeMillis();
         final int j = k;
-
-        for (k = 1; k <= 100; k++) {
+        //
+        for (k = 1; k <= 1000; k++) {
             final int i = k;
+
             final Entidade entidade = new Entidade();
             entidade.setId(k);
             entidade.setNome("NOME " + i);
@@ -20,8 +32,14 @@ public class Main {
             //INSERINDO
             Runnable inserir = new Runnable() {
                 public void run() {
-                    System.out.println("Inserindo " + i);
-                    dao.salvar(entidade);
+                    try {
+                        System.out.println("Inserindo " + i);
+                        //
+                        dao.salvar(entidade);
+                        InsertQueue.put(entidade);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             };
             //inserir.run();
@@ -29,9 +47,16 @@ public class Main {
             //ATUALIZANDO
             Runnable atualizar = new Runnable() {
                 public void run() {
-                    System.out.println("Atualizando " + i);
-                    entidade.setUpdate(true);
-                    dao.atualizar(entidade);
+                    try {
+                        Entidade entidade = InsertQueue.take();
+                        System.out.println("Atualizando " + i);
+                        entidade.setUpdate(true);
+                        dao.atualizar(entidade);
+                        UpdateQueue.put(entidade);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
                 }
             };
             //atualizar.run();
@@ -39,9 +64,19 @@ public class Main {
             //DELETANDO
             Runnable deletar = new Runnable() {
                 public void run() {
-                    System.out.println("Deletando " + i);
-                    entidade.setDelete(true);
-                    dao.atualizar(entidade);
+                    try {
+                        Entidade entidade = UpdateQueue.take();
+                        //
+                        System.out.println("Deletando " + i);
+                        entidade.setDelete(true);
+                        dao.atualizar(entidade);
+                        if(i >= 1000){
+                            long tempo2 = System.currentTimeMillis() - tempo;
+                            System.out.println("---------------------------> Tempo: " + tempo2);
+                        }
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             };
             //deletar.run();
@@ -56,7 +91,7 @@ public class Main {
             tDeletar.start();
 
         }
-        tempo = System.currentTimeMillis() - tempo;
-        System.out.println("Tempo: " + tempo);
+//        tempo = System.currentTimeMillis() - tempo;
+        //System.out.println("---------------------------> Tempo: " + tempo);
     }
 }
