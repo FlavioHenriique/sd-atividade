@@ -10,7 +10,6 @@ public class Entidade implements Serializable {
     @Id
     private int id;
     private String nome;
-
     private boolean update;
     private boolean delete;
 

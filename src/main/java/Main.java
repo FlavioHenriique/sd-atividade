@@ -1,4 +1,3 @@
-
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,12 +14,14 @@ public class Main {
         UpdateQueue = new ArrayBlockingQueue<Entidade>(50);
         DeleteQueue = new ArrayBlockingQueue<Integer>(1);
         //
-        dao = new DAO();
+        final int maximo = 1000;
+        dao = new DAO(maximo);
         int k = 1;
         final long tempo = System.currentTimeMillis();
         final int j = k;
+
         //
-        for (k = 1; k <= 1000; k++) {
+        for (k = 1; k <= maximo; k++) {
             final int i = k;
 
             final Entidade entidade = new Entidade();
@@ -67,10 +68,11 @@ public class Main {
                     try {
                         Entidade entidade = UpdateQueue.take();
                         //
+
                         System.out.println("Deletando " + i);
                         entidade.setDelete(true);
                         dao.atualizar(entidade);
-                        if(i >= 1000){
+                        if (i >= 1000) {
                             long tempo2 = System.currentTimeMillis() - tempo;
                             System.out.println("---------------------------> Tempo: " + tempo2);
                         }
