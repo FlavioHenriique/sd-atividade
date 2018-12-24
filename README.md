@@ -1,1 +1,3 @@
-# sd-atividade
+# sd-atividade - questão 1
+
+Para a solução, foi utilizada uma tabela auxiliar chamada 'Chave'. Ao iniciar a primeira aplicação, essa tabela contém um campo 'código' que será atualizado com o valor 0, fazendo assim com que a primeira aplicação salve os id's de 0 até o seu limite (por exemplo 100 ou 1000). Quando uma segunda aplicação inicia, ela incrementa o código da tabela chave (isso acontece no construtor da classe DAO). Assim, quando os id's dessa segunda aplicação forem inseridos, eles utlilzarão o código que foi incrementado para inserir a partir de seu valor. (Por exemplo, se o código for 1 dessa vez, os id's serão inseridos a partir de 101, 1001). Garantindo assim, a sequência dos id's.
